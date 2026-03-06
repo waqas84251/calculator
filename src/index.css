@@ -506,11 +506,11 @@ body {
     .casio-body {
         width: 100vw !important;
         max-width: 100vw !important;
-        height: 90vh !important;
-        /* Slightly reduced to lift from bottom */
-        margin: 0 !important;
+        height: auto !important;
+        min-height: 85vh !important;
+        margin: 0 0 60px 0 !important;
+        /* Bottom margin for navigation buttons */
         padding: 5px !important;
-        /* Minimal padding for maximum size */
         border-radius: 0;
         transform: scale(1) !important;
         display: flex;
@@ -541,6 +541,8 @@ body {
         margin-bottom: 10px;
     }
 }
+
+
 
 /* Large/Higher Resolution Desktop Screens (Widescreen) */
 @media (min-width: 1400px) and (min-height: 900px) {
@@ -1838,10 +1840,12 @@ body {
     .citizens-calc-card {
         width: 100vw !important;
         max-width: 100vw !important;
-        height: 100vh !important;
+        height: auto !important;
+        min-height: 85vh !important;
         padding: 10px !important;
         border-radius: 0;
-        margin: 0 !important;
+        margin: 0 0 60px 0 !important;
+        /* Bottom margin for navigation buttons */
         transform: none !important;
         border: none;
     }
