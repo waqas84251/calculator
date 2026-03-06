@@ -431,7 +431,17 @@ body {
     align-items: center;
     position: relative;
     overflow: hidden;
-    padding: 20px 0;
+    padding: 0;
+    /* Removed padding to allow full-height scroll */
+}
+
+@media (max-width: 768px) {
+    .main-app-container {
+        align-items: flex-start;
+        /* Better for scrolling on mobile */
+        overflow-y: auto;
+        /* Allow the main container to scroll as fallback */
+    }
 }
 
 /* Scrollbars are enabled for usability on scrollable sections */
@@ -2922,8 +2932,11 @@ body {
 @media (min-width: 321px) and (max-width: 480px) {
     .zakat-container {
         padding: 30px 12px;
-        height: 100%;
-        overflow-y: auto;
+        height: auto;
+        /* Allow it to grow */
+        min-height: 100%;
+        overflow-y: visible;
+        /* Let the parent handle scrolling or scroll naturally */
     }
 
     .zakat-card {
