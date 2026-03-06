@@ -5061,7 +5061,7 @@ function Calculator() {
     );
 
     return (
-        <div className="main-app-container">
+        <div className={`main-app-container${activeApp === "zakat" ? " zakat-mode" : ""}`}>
             <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-content" style={{ marginTop: '40px' }}>
                     <div
