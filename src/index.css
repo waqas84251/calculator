@@ -1846,7 +1846,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #fff;
+    background: #2c2c2e;
+    /* Matched to Casio dark background */
     font-family: 'Inter', sans-serif;
     padding: 20px 10px;
 }
@@ -2324,7 +2325,8 @@ body {
     min-height: 100%;
     display: block;
     padding: 20px 20px 80px 20px;
-    background: #f8fafc;
+    background: #2c2c2e;
+    /* Matched to Casio dark background */
     font-family: 'Outfit', 'Inter', sans-serif;
     box-sizing: border-box;
 }
