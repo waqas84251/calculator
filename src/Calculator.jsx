@@ -3199,6 +3199,273 @@ function Calculator() {
         consumeModifiers();
     };
 
+    // ─── UNIVERSAL EXPRESSION NORMALIZATION LAYER ─────────────────────────────
+    // This function resolves all internal template tokens so that nested
+    // expressions (e.g. sroot(8)/2 inside a fraction, or sin(30)+cos(60) inside
+    // a sqrt) evaluate correctly via pL().  ONLY adds new logic; existing code
+    // is not changed in any way.
+    const normalizeExpression = (expr) => {
+        if (!expr || typeof expr !== 'string') return expr;
+
+        // Step 1 — Convert UI display symbols to parser-safe equivalents
+        let result = expr
+            .replace(/√/g, 'sroot')    // √  →  sroot (the internal token)
+            .replace(/×/g, '*')         // ×  →  *
+            .replace(/÷/g, '/')         // ÷  →  /
+            .replace(/π/g, '(Math.PI)') // π  →  (Math.PI)
+            .replace(/²/g, '**2')
+            .replace(/³/g, '**3')
+            .replace(/⁻¹/g, '**(-1)');
+
+        // Step 2 — Ensure bare function names get parentheses when followed by
+        // digits (e.g. "sroot8" → "sroot(8)", "sin30" → "sin(30)")
+        const bareTokens = ['sroot', 'croot', 'sq', 'cb', 'l10', 'ln', 'ex', 'tx',
+            'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
+            'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+            'log', 'abs', 'Abs', 'exp'];
+        for (const tok of bareTokens) {
+            // tok followed by a digit (not already followed by '(')
+            result = result.replace(
+                new RegExp(`\\b${tok}(\\d)`, 'g'),
+                `${tok}($1)`
+            );
+        }
+
+        // Step 3 — Resolve internal template tokens recursively so that pL()
+        // can evaluate any sub-expression, no matter how deeply nested.
+        // We iterate until no more templates remain (handles nesting).
+        let changed = true;
+        let safetyCounter = 0;
+        while (changed && safetyCounter < 50) {
+            changed = false;
+            safetyCounter++;
+
+            // Helper: find the matching closing ')' for an opening paren at idx
+            const findClose = (s, openIdx) => {
+                let depth = 1;
+                for (let j = openIdx + 1; j < s.length; j++) {
+                    if (s[j] === '(') depth++;
+                    else if (s[j] === ')') depth--;
+                    if (depth === 0) return j;
+                }
+                return -1;
+            };
+
+            // sroot(x)  →  Math.sqrt(x)
+            const srootIdx = result.indexOf('sroot(');
+            if (srootIdx !== -1) {
+                const closeIdx = findClose(result, srootIdx + 5);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(srootIdx + 6, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, srootIdx) +
+                        `Math.sqrt(${normalized})` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // croot(x)  →  Math.cbrt(x)
+            const crootIdx = result.indexOf('croot(');
+            if (crootIdx !== -1) {
+                const closeIdx = findClose(result, crootIdx + 5);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(crootIdx + 6, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, crootIdx) +
+                        `Math.cbrt(${normalized})` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // sq(x)  →  Math.pow(x,2)
+            const sqIdx = result.indexOf('sq(');
+            if (sqIdx !== -1) {
+                const closeIdx = findClose(result, sqIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(sqIdx + 3, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, sqIdx) +
+                        `Math.pow(${normalized},2)` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // cb(x)  →  Math.pow(x,3)
+            const cbIdx = result.indexOf('cb(');
+            if (cbIdx !== -1) {
+                const closeIdx = findClose(result, cbIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(cbIdx + 3, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, cbIdx) +
+                        `Math.pow(${normalized},3)` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // l10(x)  →  Math.log10(x)
+            const l10Idx = result.indexOf('l10(');
+            if (l10Idx !== -1) {
+                const closeIdx = findClose(result, l10Idx + 3);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(l10Idx + 4, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, l10Idx) +
+                        `Math.log10(${normalized})` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // ln(x)  →  Math.log(x)
+            const lnIdx = result.indexOf('ln(');
+            if (lnIdx !== -1) {
+                const closeIdx = findClose(result, lnIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(lnIdx + 3, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, lnIdx) +
+                        `Math.log(${normalized})` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // ex(x)  →  Math.exp(x)
+            const exIdx = result.indexOf('ex(');
+            if (exIdx !== -1 && (exIdx === 0 || !/[a-zA-Z]/.test(result[exIdx - 1]))) {
+                const closeIdx = findClose(result, exIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(exIdx + 3, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, exIdx) +
+                        `Math.exp(${normalized})` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // tx(x)  →  Math.pow(10,x)
+            const txIdx = result.indexOf('tx(');
+            if (txIdx !== -1 && (txIdx === 0 || !/[a-zA-Z]/.test(result[txIdx - 1]))) {
+                const closeIdx = findClose(result, txIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(txIdx + 3, closeIdx);
+                    const normalized = normalizeExpression(inner);
+                    result = result.substring(0, txIdx) +
+                        `Math.pow(10,${normalized})` +
+                        result.substring(closeIdx + 1);
+                    changed = true;
+                    continue;
+                }
+            }
+
+            // q(num‡denom)  →  (num)/(denom)
+            const qIdx = result.indexOf('q(');
+            if (qIdx !== -1 && (qIdx === 0 || !/[a-zA-Z]/.test(result[qIdx - 1]))) {
+                const closeIdx = findClose(result, qIdx + 1);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(qIdx + 2, closeIdx);
+                    if (inner.includes('‡')) {
+                        const parts = inner.split('‡');
+                        if (parts.length === 2) {
+                            const num = normalizeExpression(parts[0]);
+                            const den = normalizeExpression(parts[1]);
+                            result = result.substring(0, qIdx) +
+                                `((${num})/(${den}))` +
+                                result.substring(closeIdx + 1);
+                            changed = true;
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            // mf(whole‡num‡denom)  →  (whole + num/denom)
+            const mfIdx = result.indexOf('mf(');
+            if (mfIdx !== -1) {
+                const closeIdx = findClose(result, mfIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(mfIdx + 3, closeIdx);
+                    if (inner.includes('‡')) {
+                        const parts = inner.split('‡');
+                        if (parts.length === 3) {
+                            const whole = normalizeExpression(parts[0]);
+                            const num = normalizeExpression(parts[1]);
+                            const den = normalizeExpression(parts[2]);
+                            result = result.substring(0, mfIdx) +
+                                `((${whole}) + (${num})/(${den}))` +
+                                result.substring(closeIdx + 1);
+                            changed = true;
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            // pw(base‡exp)  →  Math.pow(base, exp)
+            const pwIdx = result.indexOf('pw(');
+            if (pwIdx !== -1) {
+                const closeIdx = findClose(result, pwIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(pwIdx + 3, closeIdx);
+                    if (inner.includes('‡')) {
+                        const parts = inner.split('‡');
+                        if (parts.length === 2) {
+                            const base = normalizeExpression(parts[0]);
+                            const exp = normalizeExpression(parts[1]);
+                            result = result.substring(0, pwIdx) +
+                                `Math.pow(${base},${exp})` +
+                                result.substring(closeIdx + 1);
+                            changed = true;
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            // rt(index‡val)  →  Math.pow(val, 1/index)
+            const rtIdx = result.indexOf('rt(');
+            if (rtIdx !== -1 && (rtIdx === 0 || !/[a-zA-Z]/.test(result[rtIdx - 1]))) {
+                const closeIdx = findClose(result, rtIdx + 2);
+                if (closeIdx !== -1) {
+                    const inner = result.substring(rtIdx + 3, closeIdx);
+                    if (inner.includes('‡')) {
+                        const parts = inner.split('‡');
+                        if (parts.length === 2) {
+                            const idx = normalizeExpression(parts[0]);
+                            const val = normalizeExpression(parts[1]);
+                            result = result.substring(0, rtIdx) +
+                                `Math.pow(${val},1/(${idx}))` +
+                                result.substring(closeIdx + 1);
+                            changed = true;
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Step 4 — Implicit multiplication (digit directly before a letter/paren)
+        result = result
+            .replace(/(\d)([a-zA-Z_(\u03C0])/g, '$1*$2')
+            .replace(/(\))(\d|[a-zA-Z_(\u03C0])/g, '$1*$2');
+
+        return result;
+    };
+    // ─── END OF UNIVERSAL EXPRESSION NORMALIZATION LAYER ──────────────────────
+
     const processForEval = (expr, vars, angleMode) => {
         const angleFactor = angleMode === 'Rad' ? 1 : (angleMode === 'Deg' ? Math.PI / 180 : Math.PI / 200);
 
@@ -3308,7 +3575,12 @@ function Calculator() {
         };
 
         const pL = (s) => {
-            const cleaned = preprocess(s);
+            // Apply the Universal Normalization Layer first so nested template
+            // tokens (sroot, l10, q, mf, pw, rt, ex, tx, etc.) inside any
+            // sub-expression are resolved before standard preprocessing runs.
+            const normalized = normalizeExpression(s);
+            const cleaned = preprocess(normalized);
+
             if (cleaned === "") return NaN;
             try {
                 const { keys, vals } = getCtx();
@@ -4081,13 +4353,358 @@ function Calculator() {
         }
     };
 
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // CASIO CURSOR SYSTEM  —  Display-only layer, zero evaluation impact
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ── 1. Display Normalization ────────────────────────────────────────────
+    // Converts internal parser tokens to readable display symbols (string→string).
+    // ONLY used for UI rendering. Never touches the expression state.
+    const formatDisplayExpression = (expr) => {
+        if (!expr || typeof expr !== 'string') return expr || '';
+
+        const findClose = (s, openIdx) => {
+            let depth = 1;
+            for (let j = openIdx + 1; j < s.length; j++) {
+                if (s[j] === '(') depth++;
+                else if (s[j] === ')') depth--;
+                if (depth === 0) return j;
+            }
+            return -1;
+        };
+
+        const fmt = (s) => formatDisplayExpression(s);
+        let result = expr;
+        let changed = true;
+        let safety = 0;
+
+        while (changed && safety < 60) {
+            changed = false;
+            safety++;
+
+            // sroot(x) → √(x)
+            const si = result.indexOf('sroot(');
+            if (si !== -1) {
+                const ci = findClose(result, si + 5);
+                if (ci !== -1) {
+                    result = result.substring(0, si) + `√(${fmt(result.substring(si + 6, ci))})` + result.substring(ci + 1);
+                    changed = true; continue;
+                }
+            }
+            // croot(x) → ∛(x)
+            const cri = result.indexOf('croot(');
+            if (cri !== -1) {
+                const ci = findClose(result, cri + 5);
+                if (ci !== -1) {
+                    result = result.substring(0, cri) + `∛(${fmt(result.substring(cri + 6, ci))})` + result.substring(ci + 1);
+                    changed = true; continue;
+                }
+            }
+            // l10(x) → log(x)
+            const l10i = result.indexOf('l10(');
+            if (l10i !== -1) {
+                const ci = findClose(result, l10i + 3);
+                if (ci !== -1) {
+                    result = result.substring(0, l10i) + `log(${fmt(result.substring(l10i + 4, ci))})` + result.substring(ci + 1);
+                    changed = true; continue;
+                }
+            }
+            // tx(x) → 10^(x)
+            const txi = result.indexOf('tx(');
+            if (txi !== -1 && (txi === 0 || !/[a-zA-Z]/.test(result[txi - 1]))) {
+                const ci = findClose(result, txi + 2);
+                if (ci !== -1) {
+                    result = result.substring(0, txi) + `10^(${fmt(result.substring(txi + 3, ci))})` + result.substring(ci + 1);
+                    changed = true; continue;
+                }
+            }
+            // ex(x) → e^(x)
+            const exi = result.indexOf('ex(');
+            if (exi !== -1 && (exi === 0 || !/[a-zA-Z]/.test(result[exi - 1]))) {
+                const ci = findClose(result, exi + 2);
+                if (ci !== -1) {
+                    result = result.substring(0, exi) + `e^(${fmt(result.substring(exi + 3, ci))})` + result.substring(ci + 1);
+                    changed = true; continue;
+                }
+            }
+            // sq(x) → (x)²
+            const sqi = result.indexOf('sq(');
+            if (sqi !== -1 && (sqi === 0 || !/[a-zA-Z]/.test(result[sqi - 1]))) {
+                const ci = findClose(result, sqi + 2);
+                if (ci !== -1) {
+                    result = result.substring(0, sqi) + `(${fmt(result.substring(sqi + 3, ci))})²` + result.substring(ci + 1);
+                    changed = true; continue;
+                }
+            }
+            // cb(x) → (x)³
+            const cbi = result.indexOf('cb(');
+            if (cbi !== -1 && (cbi === 0 || !/[a-zA-Z]/.test(result[cbi - 1]))) {
+                const ci = findClose(result, cbi + 2);
+                if (ci !== -1) {
+                    result = result.substring(0, cbi) + `(${fmt(result.substring(cbi + 3, ci))})³` + result.substring(ci + 1);
+                    changed = true; continue;
+                }
+            }
+            // q(num‡denom) → (num)/(denom)
+            const qi = result.indexOf('q(');
+            if (qi !== -1 && (qi === 0 || !/[a-zA-Z]/.test(result[qi - 1]))) {
+                const ci = findClose(result, qi + 1);
+                if (ci !== -1) {
+                    const inner = result.substring(qi + 2, ci);
+                    if (inner.includes('‡')) {
+                        const [n, d] = inner.split('‡');
+                        result = result.substring(0, qi) + `(${fmt(n)})/(${fmt(d)})` + result.substring(ci + 1);
+                        changed = true; continue;
+                    }
+                }
+            }
+            // mf(w‡n‡d) → (w)(n)/(d)
+            const mfi = result.indexOf('mf(');
+            if (mfi !== -1 && (mfi === 0 || !/[a-zA-Z]/.test(result[mfi - 1]))) {
+                const ci = findClose(result, mfi + 2);
+                if (ci !== -1) {
+                    const inner = result.substring(mfi + 3, ci);
+                    if (inner.includes('‡')) {
+                        const parts = inner.split('‡');
+                        if (parts.length === 3) {
+                            result = result.substring(0, mfi) + `(${fmt(parts[0])})(${fmt(parts[1])})/(${fmt(parts[2])})` + result.substring(ci + 1);
+                            changed = true; continue;
+                        }
+                    }
+                }
+            }
+            // pw(base‡exp) → (base)^(exp)
+            const pwi = result.indexOf('pw(');
+            if (pwi !== -1 && (pwi === 0 || !/[a-zA-Z]/.test(result[pwi - 1]))) {
+                const ci = findClose(result, pwi + 2);
+                if (ci !== -1) {
+                    const inner = result.substring(pwi + 3, ci);
+                    if (inner.includes('‡')) {
+                        const [b, e] = inner.split('‡');
+                        result = result.substring(0, pwi) + `(${fmt(b)})^(${fmt(e)})` + result.substring(ci + 1);
+                        changed = true; continue;
+                    }
+                }
+            }
+            // rt(index‡val) → (index)√(val)
+            const rti = result.indexOf('rt(');
+            if (rti !== -1 && (rti === 0 || !/[a-zA-Z]/.test(result[rti - 1]))) {
+                const ci = findClose(result, rti + 2);
+                if (ci !== -1) {
+                    const inner = result.substring(rti + 3, ci);
+                    if (inner.includes('‡')) {
+                        const [idx, val] = inner.split('‡');
+                        result = result.substring(0, rti) + `(${fmt(idx)})√(${fmt(val)})` + result.substring(ci + 1);
+                        changed = true; continue;
+                    }
+                }
+            }
+        }
+        return result;
+    };
+
+    // ── 2. Cursor Context Analysis ──────────────────────────────────────────
+    // Analyses the raw expression string + cursor position and returns the
+    // character ranges (in the DISPLAY string) of:
+    //   • the innermost bracket pair containing the cursor (bracketRange)
+    //   • the enclosing function keyword + its paren block (funcRange)
+    // Both are expressed as { start, end } indices into the display string.
+    // Returns null for ranges that don't apply.
+    const computeCursorContext = (rawExpr, cursorPos, displayExpr) => {
+        // We work on the display expression for visual ranges, but use the
+        // cursor position to find context in the raw expression first, then
+        // map to display positions proportionally (display offsets differ
+        // due to token-name length changes — we keep it simple and scan the
+        // display string directly for the nearest paren pair around cursorPos).
+
+        // Scan the display string for the innermost ( ) containing cursorPos.
+        const s = displayExpr;
+        const cp = Math.min(cursorPos, s.length); // clamp
+
+        let bracketRange = null;
+        let funcRange = null;
+
+        // Walk leftward from cp to find an unmatched '('
+        let depth = 0;
+        let openIdx = -1;
+        for (let k = cp - 1; k >= 0; k--) {
+            if (s[k] === ')') depth++;
+            else if (s[k] === '(') {
+                if (depth === 0) { openIdx = k; break; }
+                depth--;
+            }
+        }
+        if (openIdx !== -1) {
+            // Walk rightward to find the matching ')'
+            let d2 = 1;
+            let closeIdx = -1;
+            for (let k = openIdx + 1; k < s.length; k++) {
+                if (s[k] === '(') d2++;
+                else if (s[k] === ')') { d2--; if (d2 === 0) { closeIdx = k; break; } }
+            }
+            if (closeIdx !== -1) {
+                bracketRange = { start: openIdx, end: closeIdx + 1 };
+
+                // Check if there is a function name immediately before openIdx
+                const knownFuncs = [
+                    'sroot', 'croot', 'sqrt', 'cbrt', 'log', 'ln',
+                    'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
+                    'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
+                    'abs', 'Abs', 'exp', 'Pol', 'Rec',
+                    '√', '∛',   // after formatDisplayExpression
+                    'l10', 'tx', 'ex', 'sq', 'cb', 'pw', 'rt', 'mf', 'q',
+                ];
+                for (const fn of knownFuncs) {
+                    const fnStart = openIdx - fn.length;
+                    if (fnStart >= 0 && s.substring(fnStart, openIdx) === fn) {
+                        funcRange = { start: fnStart, end: closeIdx + 1 };
+                        break;
+                    }
+                }
+            }
+        }
+
+        return { bracketRange, funcRange };
+    };
+
+    // ── 3. CASIO Cursor Renderer ────────────────────────────────────────────
+    // Takes a display-formatted string (output of formatDisplayExpression)
+    // and returns a React element array with:
+    //   - blinking cursor pipe at cursorPosition
+    //   - bracket-pair highlight around the innermost ( ) containing cursor
+    //   - function-block highlight around the enclosing function
+    // Does NOT modify any expression state.
+    const renderCASIOCursorSystem = (displayExpr, localCursorParams = null, charFormatter = null) => {
+        if (!displayExpr && displayExpr !== '') displayExpr = '';
+
+        let cp, pExpr;
+        if (localCursorParams) {
+            cp = Math.min(localCursorParams.cursor, displayExpr.length);
+            pExpr = localCursorParams.rawVal;
+        } else {
+            cp = Math.min(cursorPosition, displayExpr.length);
+            pExpr = expression;
+        }
+
+        const { bracketRange, funcRange } = computeCursorContext(pExpr, cp, displayExpr);
+
+        // Helper: split a string into JSX character spans, with the cursor pipe inserted
+        // at position `cursorAt` within the string's local coordinate (0-based).
+        const renderSegment = (text, globalOffset, key) => {
+            const parts = [];
+            for (let ci = 0; ci <= text.length; ci++) {
+                const globalPos = globalOffset + ci;
+                if (globalPos === cp && cp >= 0) {
+                    parts.push(<span key={`cur-${key}-${ci}`} className="casio-cursor-pipe" />);
+                }
+                if (ci < text.length) {
+                    parts.push(charFormatter ? charFormatter(text[ci]) : text[ci]);
+                }
+            }
+            return parts;
+        };
+
+        // Determine the ranges to highlight (func > bracket for priority)
+        // Build a layered output:
+        //   [before funcRange] [funcRange start … bracketRange start] [bracketRange] [funcRange end … ]  [after]
+        // We always render from left to right.
+
+        const pieces = [];
+
+        // If no bracket context at all — just render the plain text with cursor
+        if (!bracketRange && !funcRange) {
+            pieces.push(
+                <span key="plain">
+                    {renderSegment(displayExpr, 0, 'plain')}
+                </span>
+            );
+            return pieces;
+        }
+
+        // Ranges we'll use (fallback: bracketRange for func if no funcRange)
+        const fr = funcRange || bracketRange;
+        const br = bracketRange;
+
+        // Segment indices (all into displayExpr)
+        const fStart = fr ? fr.start : (br ? br.start : 0);
+        const fEnd = fr ? fr.end : (br ? br.end : displayExpr.length);
+        const bStart = br ? br.start : fStart;
+        const bEnd = br ? br.end : fEnd;
+
+        // 1. Before func highlight
+        if (fStart > 0) {
+            pieces.push(
+                <span key="pre-func">
+                    {renderSegment(displayExpr.substring(0, fStart), 0, 'pf')}
+                </span>
+            );
+        }
+
+        // 2. Func highlight — wraps everything from fStart to fEnd
+        //    Inside it: [fStart..bStart) plain, [bStart..bEnd) bracket-highlight, [bEnd..fEnd) plain
+        const funcInner = [];
+
+        // 2a. func name part before bracket (fStart → bStart), same offset
+        if (bStart > fStart) {
+            funcInner.push(
+                <span key="fn-name">
+                    {renderSegment(displayExpr.substring(fStart, bStart), fStart, 'fn')}
+                </span>
+            );
+        }
+
+        // 2b. Bracket highlight from bStart → bEnd
+        if (br) {
+            funcInner.push(
+                <span key="bracket-hl" className="casio-bracket-highlight">
+                    {renderSegment(displayExpr.substring(bStart, bEnd), bStart, 'br')}
+                </span>
+            );
+        }
+
+        // 2c. Remainder inside func after bracket ends (bEnd → fEnd)
+        if (fEnd > bEnd) {
+            funcInner.push(
+                <span key="post-br">
+                    {renderSegment(displayExpr.substring(bEnd, fEnd), bEnd, 'pb')}
+                </span>
+            );
+        }
+
+        // Wrap in func highlight if there is one, else just push inner
+        if (funcRange) {
+            pieces.push(
+                <span key="func-hl" className="casio-func-highlight">
+                    {funcInner}
+                </span>
+            );
+        } else {
+            pieces.push(...funcInner);
+        }
+
+        // 3. After func highlight
+        if (fEnd < displayExpr.length) {
+            pieces.push(
+                <span key="post-func">
+                    {renderSegment(displayExpr.substring(fEnd), fEnd, 'aft')}
+                </span>
+            );
+        }
+
+        return pieces;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // END OF CASIO CURSOR SYSTEM
+    // ═══════════════════════════════════════════════════════════════════════
+
     const renderFormattedExpression = () => {
+
         if (config.display === 'LineIO') {
             return (
                 <div className="math-line expression">
-                    {expression.slice(0, cursorPosition)}
-                    <span className="lcd-cursor"></span>
-                    {expression.slice(cursorPosition)}
+                    {renderCASIOCursorSystem(formatDisplayExpression(expression))}
                 </div>
             );
         }
@@ -4118,7 +4735,8 @@ function Calculator() {
 
         const renderBoxed = (val, startPos, type = "normal") => {
             val = val || "";
-            const isActive = currentPos >= startPos && currentPos <= startPos + val.length;
+            // Use actual user cursor position, not the iterating process pointer! (Fixes bug missing cursor in MthIO)
+            const isActive = cursorPosition >= startPos && cursorPosition <= startPos + val.length;
             const isEmpty = val.length === 0;
 
             let baseClass = "";
@@ -4136,23 +4754,23 @@ function Calculator() {
                 setCursorPosition(startPos + val.length);
             };
 
+            const displayStr = formatDisplayExpression(val);
+            const localCp = cursorPosition - startPos;
+
+            // Apply nested casio cursor system rendering to all boxes seamlessly
             if (isActive) {
                 if (isEmpty) {
-                    return <span className={className} onPointerDown={handleClick}><span className="lcd-cursor"></span></span>;
+                    return <span className={className} onPointerDown={handleClick}><span className="casio-cursor-pipe"></span></span>;
                 }
-                const before = val.slice(0, cursorPosition - startPos);
-                const after = val.slice(cursorPosition - startPos);
                 return (
                     <span className={className} onPointerDown={handleClick}>
-                        {formatInternal(before)}
-                        <span className="lcd-cursor"></span>
-                        {formatInternal(after)}
+                        {renderCASIOCursorSystem(displayStr, { cursor: localCp, rawVal: val }, formatInternal)}
                     </span>
                 );
             }
             return (
                 <span className={className} onPointerDown={handleClick}>
-                    {isEmpty ? "" : formatInternal(val)}
+                    {isEmpty ? "" : renderCASIOCursorSystem(displayStr, { cursor: -1, rawVal: val }, formatInternal)}
                 </span>
             );
         };

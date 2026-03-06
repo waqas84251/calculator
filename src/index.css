@@ -36,6 +36,42 @@
     }
 }
 
+/* ─── CASIO Cursor System ──────────────────────────────────────────────── */
+
+/* Active bracket-pair highlight — subtle green tint, like a real CASIO */
+.casio-bracket-highlight {
+    background-color: rgba(60, 160, 60, 0.13);
+    border-radius: 2px;
+    outline: 1px solid rgba(60, 160, 60, 0.28);
+    outline-offset: 0px;
+    display: inline;
+}
+
+/* Active function-block highlight — amber tint for the enclosing function */
+.casio-func-highlight {
+    background-color: rgba(200, 130, 0, 0.10);
+    border-radius: 2px;
+    outline: 1px solid rgba(200, 130, 0, 0.25);
+    outline-offset: 0px;
+    display: inline;
+}
+
+/* The blinking vertical cursor pipe — same style as lcd-cursor but named
+   for the new system so it can be styled independently if needed */
+.casio-cursor-pipe {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background-color: #1a1a1a;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin: 0 0px;
+}
+
+/* ─── End CASIO Cursor System ──────────────────────────────────────────── */
+
+
+
 .mode-menu {
     display: flex;
     justify-content: space-between;
