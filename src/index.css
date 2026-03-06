@@ -506,7 +506,8 @@ body {
     .casio-body {
         width: 100vw !important;
         max-width: 100vw !important;
-        height: 100vh !important;
+        height: 90vh !important;
+        /* Slightly reduced to lift from bottom */
         margin: 0 !important;
         padding: 5px !important;
         /* Minimal padding for maximum size */
