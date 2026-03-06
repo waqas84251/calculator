@@ -193,7 +193,7 @@ const zakatTranslations = {
 };
 
 // ─── ZAKAT CALCULATOR COMPONENT ───────────────────────────────────────────────
-function ZakatCalculator() {
+function ZakatCalculator({ isSidebarOpen, setIsSidebarOpen }) {
     const [goldGrams, setGoldGrams] = React.useState("");
     const [silverGrams, setSilverGrams] = React.useState("");
     const [cashSavings, setCashSavings] = React.useState("");
@@ -300,8 +300,14 @@ function ZakatCalculator() {
             <div className={`zakat-card ${lang === 'ur' ? 'ur-rtl' : ''}`}>
 
                 {/* Header & Language Toggle */}
-                <div className="zakat-top-actions">
-                    <div className="lang-toggle">
+                <div className="zakat-top-actions" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px 0' }}>
+                    <div className="settings-icon-inline" title="Settings" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ position: 'static', cursor: 'pointer', opacity: 0.7 }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '22px', height: '22px' }}>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </div>
+                    <div className="lang-toggle" style={{ position: 'absolute', right: '0' }}>
                         <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
                         <button className={lang === 'ur' ? 'active' : ''} onClick={() => setLang('ur')}>اردو</button>
                     </div>
@@ -5083,24 +5089,22 @@ function Calculator() {
             </div>
             {isSidebarOpen && <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>}
 
-            <div className="settings-icon" title="Settings" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-            </div>
-
             {activeApp === "casio" ? (
                 <div className="casio-body">
                     <div className="casio-inner">
                         {/* Branding & Top LCD Details */}
-                        <div className="top-branding">
-                            <span className="brand">CASIO</span>
-                            <div className="header-right">
+                        <div className="top-branding" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                            <span className="brand" style={{ position: 'absolute', left: '0' }}>CASIO</span>
+                            <div className="settings-icon-inline" title="Settings" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ cursor: 'pointer', opacity: 0.8, display: 'flex' }}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px', color: '#fff' }}>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                            </div>
+                            <div className="header-right" style={{ position: 'absolute', right: '0' }}>
                                 <div className="model-info">
                                     <span className="model">fx-991ES PLUS</span>
                                 </div>
-
                             </div>
                         </div>
 
@@ -5579,6 +5583,14 @@ function Calculator() {
             ) : activeApp === "simple" ? (
                 <div className="simple-calc-container">
                     <div className="citizens-calc-card">
+                        <div className="citizens-header-gear" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{
+                            position: 'absolute', top: '15px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', zIndex: 10, opacity: 0.6
+                        }}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px', color: '#fff' }}>
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </div>
                         <div className="citizens-display-container">
                             <div className="citizens-display">
                                 <span className={`gt-indicator ${simpleGT !== 0 ? 'visible' : ''}`}>GT</span>
@@ -5598,14 +5610,7 @@ function Calculator() {
                                 }>
                                     {simpleRes || "0"}
                                 </div>
-                                <div className="citizens-sd-hint" style={{ fontSize: '10px', opacity: 0.5, position: 'absolute', right: '5px', bottom: '2px' }}>
-                                    {isFractionDisplay ? "S" : "D"}
-                                </div>
                             </div>
-                        </div>
-
-                        <div className="citizens-controls" style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 20px', marginBottom: '5px' }}>
-                            <button className="citizens-btn sd-btn" style={{ width: '45px', height: '25px', fontSize: '12px', background: '#555', color: '#fff' }} onClick={() => handleSimpleButton("S⇔D")}>S⇔D</button>
                         </div>
 
                         <div className="citizens-faceplate">
@@ -5657,7 +5662,7 @@ function Calculator() {
                     </div>
                 </div>
             ) : (
-                <ZakatCalculator />
+                <ZakatCalculator isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             )}
         </div>
     );
