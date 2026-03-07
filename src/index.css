@@ -1014,17 +1014,31 @@ body {
     overflow-y: auto;
     /* Allow vertical scrolling for long expressions */
     scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
+/* Premium Integrated Scrollbar for LCD Screens */
 .display-content::-webkit-scrollbar,
 .citizens-display::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
+}
+
+.display-content::-webkit-scrollbar-track,
+.citizens-display::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .display-content::-webkit-scrollbar-thumb,
 .citizens-display::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+}
+
+.display-content::-webkit-scrollbar-thumb:hover,
+.citizens-display::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
 }
 
 /* Natural Display Math Formatting */
