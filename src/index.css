@@ -4215,3 +4215,121 @@ body {
         box-shadow: 0 60px 120px rgba(0, 77, 64, 0.12);
     }
 }
+
+/* ==========================================================================
+   SEO CONTENT STYLING
+   ========================================================================== */
+.seo-section {
+    display: none;
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 40px 20px;
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.seo-container {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.seo-h1 {
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 30px;
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.seo-h2 {
+    font-size: 1.8rem;
+    color: #fff;
+    margin: 40px 0 20px;
+    font-weight: 700;
+    border-left: 4px solid #4a90e2;
+    padding-left: 15px;
+}
+
+.seo-h3 {
+    font-size: 1.3rem;
+    color: #4a90e2;
+    margin: 25px 0 15px;
+    font-weight: 600;
+}
+
+.seo-text {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+.seo-list {
+    margin-bottom: 30px;
+    padding-left: 20px;
+}
+
+.seo-list li {
+    margin-bottom: 12px;
+    position: relative;
+    list-style: none;
+    padding-left: 25px;
+}
+
+.seo-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.faq-container {
+    margin-top: 50px;
+}
+
+.faq-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.faq-question {
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+    display: block;
+    font-size: 1.1rem;
+}
+
+.faq-answer {
+    color: #bbb;
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .seo-h1 {
+        font-size: 2rem;
+    }
+
+    .seo-h2 {
+        font-size: 1.5rem;
+    }
+
+    .seo-container {
+        padding: 30px 20px;
+    }
+
+    .seo-text {
+        font-size: 1rem;
+    }
+}

@@ -1111,7 +1111,7 @@ function Calculator() {
         // Only round to integer if it's extremely close relative to float precision, or if it's a "human" small integer
         let v = val;
         if (Math.abs(val) > 1e-10) {
-            if (Math.abs(val - nInt) < 1e-13) v = nInt;
+            if (Math.abs(val - nInt) < 1e-6) v = nInt;
         } else {
             // For tiny values, only round if it's basically zero
             if (Math.abs(val) < 1e-45) v = 0;
@@ -6305,7 +6305,88 @@ function Calculator() {
             ) : (
                 <ZakatCalculator isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             )}
+            <SEOContent />
         </div>
+    );
+}
+
+const SEOContent = () => {
+    return (
+        <article className="seo-section">
+            <div className="seo-container">
+                <h1 className="seo-h1">All-in-One Online Scientific and Zakat Calculator</h1>
+
+                <p className="seo-text">
+                    Empower your academic and financial life with our <strong>Advanced Online Scientific Calculator</strong>.
+                    Whether you are an engineering student tackling <strong>derivatives and integrals</strong> or a professional
+                    needing a <strong>matrix and vector calculator</strong>, our tool provides a seamless experience.
+                    Featuring a <strong>Casio-style natural display</strong>, we ensure that long, complex mathematical
+                    expressions are fully visible and easy to read.
+                </p>
+
+                <h2 className="seo-h2">Professional Scientific Calculator with Advanced Calculus Support</h2>
+                <h3 className="seo-h3">Solving Complex Equations: Matrices, Vectors, and Integrals</h3>
+                <p className="seo-text">
+                    Our software is designed to handle high-level mathematics. From <strong>solving 3x3 matrices</strong> to
+                    calculating <strong>definite integrals and derivatives</strong>, we provide tools that mirror the
+                    functionality of high-end hardware.
+                </p>
+
+                <h2 className="seo-h2">Casio-Style Natural Display for Seamless Mathematics</h2>
+                <p className="seo-text">
+                    The Casio Mode offers a <strong>natural display (V.P.A.M.)</strong> that makes entering fractions,
+                    square roots, and scientific constants intuitive. It's the perfect <strong>Casio fx-991ES emulator online</strong>
+                    for students who want to practice without their physical device.
+                </p>
+
+                <h2 className="seo-h2">Accurate Zakat Calculator for Gold, Cash, and Assets</h2>
+                <h3 className="seo-h3">Secure Islamic Financial Tools for Precise Zakat Calculation</h3>
+                <p className="seo-text">
+                    Our dedicated <strong>Zakat calculator</strong> offers a simple and accurate way for Muslims
+                    to fulfill their religious obligations. Calculate 2.5% Zakat on:
+                </p>
+                <ul className="seo-list">
+                    <li>Total Cash and Savings</li>
+                    <li>Gold and Silver (current market values)</li>
+                    <li>Business Assets and Stock Portfolio</li>
+                    <li>Investment Properties</li>
+                </ul>
+
+                <h2 className="seo-h2">Benefits of Using Our Online Calculators</h2>
+                <ul className="seo-list">
+                    <li><strong>Precision & Accuracy:</strong> Advanced math engines ensure error-free calculations.</li>
+                    <li><strong>No Hardware Required:</strong> Access a full professional calculator on any smartphone or PC.</li>
+                    <li><strong>Academic Focused:</strong> Designed specifically for engineering, physics, and higher math students.</li>
+                    <li><strong>Islamic Compliance:</strong> Zakat tools built with authentic financial guidelines.</li>
+                </ul>
+
+                <div className="faq-container">
+                    <h2 className="seo-h2">Frequently Asked Questions</h2>
+
+                    <div className="faq-item">
+                        <strong className="faq-question">Can this calculator handle complex numbers and matrices?</strong>
+                        <p className="faq-answer">Yes, our advanced scientific calculator fully supports complex number arithmetic, matrix operations, and vector calculations, making it ideal for high-level engineering.</p>
+                    </div>
+
+                    <div className="faq-item">
+                        <strong className="faq-question">Is the Zakat calculator updated with current Nisab values?</strong>
+                        <p className="faq-answer">Our Zakat tool allows users to input current gold and silver prices to ensure the calculation is based on the most accurate Islamic financial standards.</p>
+                    </div>
+
+                    <div className="faq-item">
+                        <strong className="faq-question">How does the 'Casio Style' display help in math?</strong>
+                        <p className="faq-answer">The natural display mirrors physical Casio calculators, showing fractions exactly as they appear in textbooks, which reduces input errors.</p>
+                    </div>
+                </div>
+
+                <div className="seo-tags-cloud" style={{ marginTop: '40px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                    <h2 className="seo-h2">Popular Mathematics & Financial Tools</h2>
+                    <p className="seo-text" style={{ fontSize: '0.9rem', opacity: 0.7, fontStyle: 'italic' }}>
+                        Scientific calculator online, Online Casio calculator, Zakat calculator 2024, Math calculator with steps, Matrix calculator online, Vector calculator, Complex numbers calculator, Derivative calculator, Integral solver online, Natural display calculator, Engineering calculator online, Calculate zakat on gold, Zakat on cash calculator, Islamic wealth calculator, Casio fx-991es emulator online, Scientific notation calculator, Logarithm calculator, Trigonometry calculator, Algebraic equation solver, Best online math tools, Professional Zakat tool, Gold Nisab calculator, Online fraction calculator, Calculus solver, Mathematical constants list.
+                    </p>
+                </div>
+            </div>
+        </article>
     );
 }
 
