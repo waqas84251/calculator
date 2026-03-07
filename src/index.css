@@ -1011,6 +1011,20 @@ body {
     justify-content: flex-start;
     color: #2a2a2a;
     text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    /* Allow vertical scrolling for long expressions */
+    scrollbar-width: thin;
+}
+
+.display-content::-webkit-scrollbar,
+.citizens-display::-webkit-scrollbar {
+    width: 4px;
+}
+
+.display-content::-webkit-scrollbar-thumb,
+.citizens-display::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
 }
 
 /* Natural Display Math Formatting */
@@ -1061,8 +1075,12 @@ body {
     justify-content: flex-start;
     color: rgba(0, 0, 0, 0.85);
     word-break: break-all;
-    max-height: 45%;
-    overflow: hidden;
+    max-height: none;
+    /* Removed limit */
+    overflow: visible;
+    /* Allow it to grow */
+    flex-wrap: wrap;
+    /* Enable wrapping */
 }
 
 .result {
@@ -1072,6 +1090,8 @@ body {
     color: #1a1a1a;
     margin-top: auto;
     letter-spacing: -1px;
+    flex-wrap: wrap;
+    word-break: break-all;
 }
 
 /* Top Row Controls */
@@ -2008,8 +2028,9 @@ body {
     font-family: 'Roboto Mono', monospace;
     position: relative;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    /* Ensure content doesn't push display size */
+    overflow-y: auto;
+    /* Allow scrolling inside the display */
+    scrollbar-width: thin;
 }
 
 .citizens-display::after {
@@ -2025,14 +2046,14 @@ body {
 
 .citizens-expr {
     font-size: 2.2rem;
-    /* Reduced to half of previous large size */
     color: rgba(0, 0, 0, 0.7);
     margin-top: 5px;
     font-weight: 700;
     line-height: 1.1;
     overflow-wrap: break-word;
-    max-height: 4.5rem;
-    overflow: hidden;
+    word-break: break-all;
+    max-height: none;
+    overflow: visible;
 }
 
 .citizens-res {
@@ -2043,9 +2064,10 @@ body {
     letter-spacing: -1px;
     line-height: 1;
     padding-bottom: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    /* Allow wrapping */
+    word-break: break-all;
+    overflow: visible;
     width: 100%;
     flex-shrink: 0;
 }
