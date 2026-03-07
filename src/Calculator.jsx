@@ -93,6 +93,50 @@ const NUM_BUTTONS = [
     { main: "=", gold: "", pink: "" }
 ];
 
+// ─── SCIENTIFIC CONSTANTS DEFINITION ──────────────────────────────────────────
+const SCIENTIFIC_CONSTS = {
+    "01": { symbol: "mp", name: "Proton mass", value: 1.6726219e-27 },
+    "02": { symbol: "mn", name: "Neutron mass", value: 1.6749275e-27 },
+    "03": { symbol: "me", name: "Electron mass", value: 9.10938356e-31 },
+    "04": { symbol: "mμ", name: "Muon mass", value: 1.8835316e-28 },
+    "05": { symbol: "a0", name: "Bohr radius", value: 5.291772109e-11 },
+    "06": { symbol: "h", name: "Planck constant", value: 6.62607015e-34 },
+    "07": { symbol: "μN", name: "Nuclear magneton", value: 5.050783699e-27 },
+    "08": { symbol: "μB", name: "Bohr magneton", value: 9.274009994e-24 },
+    "09": { symbol: "ħ", name: "Planck constant over 2π", value: 1.054571817e-34 },
+    "10": { symbol: "α", name: "Fine-structure constant", value: 7.2973525693e-3 },
+    "11": { symbol: "re", name: "Classical electron radius", value: 2.8179403227e-15 },
+    "12": { symbol: "λc", name: "Compton wavelength", value: 2.4263102367e-12 },
+    "13": { symbol: "γp", name: "Proton gyromagnetic ratio", value: 267522190.0 },
+    "14": { symbol: "λcp", name: "Proton Compton wavelength", value: 1.3214098539e-15 },
+    "15": { symbol: "λcn", name: "Neutron Compton wavelength", value: 1.3195909048e-15 },
+    "16": { symbol: "R∞", name: "Rydberg constant", value: 10973731.56816 },
+    "17": { symbol: "u", name: "Atomic mass constant", value: 1.66053906660e-27 },
+    "18": { symbol: "μp", name: "Proton magnetic moment", value: 1.4106067873e-26 },
+    "19": { symbol: "μe", name: "Electron magnetic moment", value: -9.284764620e-24 },
+    "20": { symbol: "μn", name: "Neutron magnetic moment", value: -9.6623650e-27 },
+    "21": { symbol: "μμ", name: "Muon magnetic moment", value: -4.49044826e-26 },
+    "22": { symbol: "F", name: "Faraday constant", value: 96485.33212 },
+    "23": { symbol: "e_c", name: "Elementary charge", value: 1.602176634e-19 },
+    "24": { symbol: "NA", name: "Avogadro constant", value: 6.02214076e23 },
+    "25": { symbol: "k", name: "Boltzmann constant", value: 1.380649e-23 },
+    "26": { symbol: "Vm", name: "Molar volume of ideal gas", value: 0.022710954641 },
+    "27": { symbol: "R", name: "Molar gas constant", value: 8.314462618 },
+    "28": { symbol: "c0", name: "Speed of light in vacuum", value: 299792458 },
+    "29": { symbol: "c1", name: "First radiation constant", value: 3.741771852e-16 },
+    "30": { symbol: "c2", name: "Second radiation constant", value: 0.01438776877 },
+    "31": { symbol: "σ", name: "Stefan-Boltzmann constant", value: 5.670374419e-8 },
+    "32": { symbol: "ε0", name: "Electric constant", value: 8.8541878128e-12 },
+    "33": { symbol: "μ0", name: "Magnetic constant", value: 1.25663706212e-6 },
+    "34": { symbol: "Φ0", name: "Magnetic flux quantum", value: 2.067833848e-15 },
+    "35": { symbol: "g", name: "Standard acceleration of gravity", value: 9.80665 },
+    "36": { symbol: "Z0", name: "Characteristic impedance of vacuum", value: 376.730313668 },
+    "37": { symbol: "t", name: "Celsius temperature", value: 273.15 },
+    "38": { symbol: "G", name: "Gravitational constant", value: 6.67430e-11 },
+    "39": { symbol: "G_alt", name: "Gravitational constant", value: 6.67430e-11 },
+    "40": { symbol: "atm", name: "Standard atmosphere", value: 101325 }
+};
+
 // ─── ZAKAT CALCULATOR SUB-COMPONENTS ──────────────────────────────────────────
 const ZakatInputRow = ({ label, icon, value, onChange, unit, placeholder, lang }) => (
     <div className={`zakat-input-row ${lang === 'ur' ? 'ur-rtl' : ''}`}>
@@ -2353,17 +2397,7 @@ function Calculator() {
             if (/^[0-9]$/.test(label)) {
                 const nextCode = constCode + label;
                 if (nextCode.length === 2) {
-                    const constants = {
-                        "01": "mp", "02": "mn", "03": "me", "04": "mμ", "05": "a0",
-                        "06": "h", "07": "μN", "08": "μB", "09": "ħ", "10": "α",
-                        "11": "re", "12": "λc", "13": "γp", "14": "λcp", "15": "λcn",
-                        "16": "R∞", "17": "u", "18": "μp", "19": "μe", "20": "μn",
-                        "21": "μμ", "22": "F", "23": "e_c", "24": "NA", "25": "k",
-                        "26": "Vm", "27": "R", "28": "c0", "29": "c1", "30": "c2",
-                        "31": "σ", "32": "ε0", "33": "μ0", "34": "Φ0", "35": "g",
-                        "36": "Z0", "37": "t", "38": "G", "39": "G", "40": "atm"
-                    };
-                    const char = constants[nextCode] || "??";
+                    const char = SCIENTIFIC_CONSTS[nextCode]?.symbol || "??";
                     setExpression(prev => prev.slice(0, cursorPosition) + char + prev.slice(cursorPosition));
                     setCursorPosition(prev => prev + char.length);
                     setIsConstMenuOpen(false);
@@ -3471,7 +3505,7 @@ function Calculator() {
 
         const preprocess = (s) => {
             if (!s || s.trim() === "") return "";
-            const processedS = s
+            let processedS = s
                 .replace(/\\/g, "")
                 .replace(/_\{(.*?)\}/g, "_$1")
                 .replace(/(?<![a-zA-Z])x(?![a-zA-Z])/g, "X")
@@ -3483,46 +3517,15 @@ function Calculator() {
                 })
                 .replace(/Abs\(/g, "abs(")
                 .replace(/l10\(/g, "log(")
-                .replace(/log_?10\(/g, "log(")
-                .replace(/(?<![a-zA-Z])mp(?![a-zA-Z])/g, "(1.6726219*10**-27)")
-                .replace(/(?<![a-zA-Z])mn(?![a-zA-Z])/g, "(1.6749275*10**-27)")
-                .replace(/(?<![a-zA-Z])me(?![a-zA-Z])/g, "(9.10938356*10**-31)")
-                .replace(/(?<![a-zA-Z])mμ(?![a-zA-Z])/g, "(1.8835316*10**-28)")
-                .replace(/(?<![a-zA-Z])a0(?![a-zA-Z])/g, "(5.291772109*10**-11)")
-                .replace(/(?<![a-zA-Z])h(?![a-zA-Z])/g, "(6.62607015*10**-34)")
-                .replace(/(?<![a-zA-Z])μN(?![a-zA-Z])/g, "(5.050783699*10**-27)")
-                .replace(/(?<![a-zA-Z])μB(?![a-zA-Z])/g, "(9.274009994*10**-24)")
-                .replace(/(?<![a-zA-Z])ħ(?![a-zA-Z])/g, "(1.054571817*10**-34)")
-                .replace(/(?<![a-zA-Z])α(?![a-zA-Z])/g, "(7.2973525693*10**-3)")
-                .replace(/(?<![a-zA-Z])re(?![a-zA-Z])/g, "(2.8179403227*10**-15)")
-                .replace(/(?<![a-zA-Z])λcp(?![a-zA-Z])/g, "(1.3214098539*10**-15)")
-                .replace(/(?<![a-zA-Z])λcn(?![a-zA-Z])/g, "(1.3195909048*10**-15)")
-                .replace(/(?<![a-zA-Z])λc(?![a-zA-Z])/g, "(2.4263102367*10**-12)")
-                .replace(/(?<![a-zA-Z])γp(?![a-zA-Z])/g, "(2.675221900*10**8)")
-                .replace(/(?<![a-zA-Z])R∞(?![a-zA-Z])/g, "(10973731.56816)")
-                .replace(/(?<![a-zA-Z])u(?![a-zA-Z])/g, "(1.66053906660*10**-27)")
-                .replace(/(?<![a-zA-Z])μp(?![a-zA-Z])/g, "(1.4106067873*10**-26)")
-                .replace(/(?<![a-zA-Z])μe(?![a-zA-Z])/g, "(-9.284764620*10**-24)")
-                .replace(/(?<![a-zA-Z])μn(?![a-zA-Z])/g, "(-9.6623650*10**-27)")
-                .replace(/(?<![a-zA-Z])μμ(?![a-zA-Z])/g, "(-4.49044826*10**-26)")
-                .replace(/(?<![a-zA-Z])F(?![a-zA-Z])/g, "(96485.33212)")
-                .replace(/(?<![a-zA-Z])e_c(?![a-zA-Z])/g, "(1.602176634*10**-19)")
-                .replace(/(?<![a-zA-Z])NA(?![a-zA-Z])/g, "(6.02214076*10**23)")
-                .replace(/(?<![a-zA-Z])k(?![a-zA-Z])/g, "(1.380649*10**-23)")
-                .replace(/(?<![a-zA-Z])Vm(?![a-zA-Z])/g, "(22.710954641*10**-3)")
-                .replace(/(?<![a-zA-Z])R(?![a-zA-Z])/g, "(8.314462618)")
-                .replace(/(?<![a-zA-Z])c0(?![a-zA-Z])/g, "(299792458)")
-                .replace(/(?<![a-zA-Z])c1(?![a-zA-Z])/g, "(3.741771852*10**-16)")
-                .replace(/(?<![a-zA-Z])c2(?![a-zA-Z])/g, "(1.438776877*10**-2)")
-                .replace(/(?<![a-zA-Z])σ(?![a-zA-Z])/g, "(5.670374419*10**-8)")
-                .replace(/(?<![a-zA-Z])ε0(?![a-zA-Z])/g, "(8.8541878128*10**-12)")
-                .replace(/(?<![a-zA-Z])μ0(?![a-zA-Z])/g, "(1.25663706212*10**-6)")
-                .replace(/(?<![a-zA-Z])Φ0(?![a-zA-Z])/g, "(2.067833848*10**-15)")
-                .replace(/(?<![a-zA-Z])g(?![a-zA-Z])/g, "(9.80665)")
-                .replace(/(?<![a-zA-Z])Z0(?![a-zA-Z])/g, "(376.730313668)")
-                .replace(/(?<![a-zA-Z])t(?![a-zA-Z])/g, "(273.15)")
-                .replace(/(?<![a-zA-Z])G(?![a-zA-Z])/g, "(6.67430*10**-11)")
-                .replace(/atm(?![a-zA-Z])/g, "(101325)")
+                .replace(/log_?10\(/g, "log(");
+
+            // Replace Scientific Constants from central definition
+            Object.values(SCIENTIFIC_CONSTS).forEach(c => {
+                const reg = new RegExp(`(?<![a-zA-Z])${c.symbol}(?![a-zA-Z])`, 'g');
+                processedS = processedS.replace(reg, `(${c.value})`);
+            });
+
+            processedS = processedS
                 .replace(/ex\((.*?)\)/g, "exp($1)")
                 .replace(/tx\((.*?)\)/g, "pow10($1)")
                 .replace(/x10\^/g, "*10**")
@@ -3539,7 +3542,7 @@ function Calculator() {
 
             // Handle implicit multiplication (e.g., 2X -> 2*X, 2( -> 2*(, )X -> )*X )
             // Added support for scientific constants (mp, mn, me, etc.)
-            const scientificConstants = "mp|mn|me|mμ|a0|h|μN|μB|ħ|α|re|λc|γp|λcp|λcn|R∞|u|μp|μe|μn|μμ|F|e_c|NA|k|Vm|R|c0|c1|c2|σ|ε0|μ0|Φ0|g|Z0|t|G|atm";
+            const scientificConstants = Object.values(SCIENTIFIC_CONSTS).map(c => c.symbol).join("|");
             const termStart = `(\\(|[A-FXYMπei]|${scientificConstants}|asinh|acosh|atanh|sinh|cosh|tanh|asin|acos|atan|sin|cos|tan|log|ln|Abs|Ran#|RanInt|Rnd|Ans|∫|Σ|q\\(|mf\\(|pw\\(|rt\\(|ex\\(|tx\\()`;
             const varList = `[A-FXYMπei]|${scientificConstants}`;
 
@@ -4501,7 +4504,7 @@ function Calculator() {
                 }
             }
         }
-        return result;
+        return result.replace(/e_c/g, "e");
     };
 
     // ── 2. Cursor Context Analysis ──────────────────────────────────────────
@@ -5466,15 +5469,23 @@ function Calculator() {
 
         const evaluateRes = (expr) => {
             try {
-                const s = expr
+                let s = expr
                     .replace(/×/g, "*")
                     .replace(/÷/g, "/")
-                    // Handle implicit multiplication (e.g., 2π -> 2*π)
-                    .replace(/(\d+)([πe])/g, "$1*$2")
+                    // Handle implicit multiplication
+                    .replace(/(\d+)([πe]|[a-zA-Z]+)/g, "$1*$2")
                     .replace(/([πe])(\d+)/g, "$1*$2")
-                    .replace(/([πe])([πe])/g, "$1*$2")
-                    .replace(/π/g, "(Math.PI)")
+                    .replace(/([πe])([πe])/g, "$1*$2");
+
+                // Replace Scientific Constants
+                Object.values(SCIENTIFIC_CONSTS).forEach(c => {
+                    const reg = new RegExp(`(?<![a-zA-Z])${c.symbol}(?![a-zA-Z])`, 'g');
+                    s = s.replace(reg, `(${c.value})`);
+                });
+
+                s = s.replace(/π/g, "(Math.PI)")
                     .replace(/(?<![a-zA-Z])e+/g, (m) => "(Math.E)".repeat(m.length));
+
                 let res = eval(s);
                 // Precision Fix
                 if (Math.abs(res - Math.round(res)) < 0.000001) res = Math.round(res);
@@ -5774,9 +5785,21 @@ function Calculator() {
                                                 <div style={{ fontSize: '18px', alignSelf: 'flex-end' }}>{convCode || "__"}</div>
                                             </div>
                                         ) : isConstMenuOpen ? (
-                                            <div className="math-line prompt-mode" style={{ flexDirection: 'column', alignItems: 'flex-start', color: '#000' }}>
-                                                <div>CONST Number? (01-40)</div>
-                                                <div style={{ fontSize: '18px', alignSelf: 'flex-end' }}>{constCode || "__"}</div>
+                                            <div className="math-line prompt-mode" style={{ flexDirection: 'column', alignItems: 'flex-start', color: '#000', padding: '2px 5px' }}>
+                                                <div style={{ fontSize: '12px', opacity: 0.8 }}>Scientific Constant (01-40)</div>
+                                                <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                                                    <div style={{ fontSize: '10px', color: '#333', flex: 1 }}>
+                                                        {constCode.length > 0 ? (
+                                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                                <span style={{ fontWeight: 'bold' }}>{SCIENTIFIC_CONSTS[constCode.padEnd(2, '1')]?.symbol.replace('_c', '')} ({SCIENTIFIC_CONSTS[constCode.padEnd(2, '1')]?.name})</span>
+                                                                <span>Value: {SCIENTIFIC_CONSTS[constCode.padEnd(2, '1')]?.value.toExponential(5)}</span>
+                                                            </div>
+                                                        ) : "Enter 01-40 (e.g. 01 for mp)"}
+                                                    </div>
+                                                    <div style={{ fontSize: '18px', fontWeight: 'bold', border: '1px solid #555', padding: '0 4px', background: 'rgba(255,255,255,0.3)' }}>
+                                                        {constCode.padEnd(2, "_")}
+                                                    </div>
+                                                </div>
                                             </div>
                                         ) : isMatrixMenuOpen ? (
                                             matrixSubState === 'dim_select' ? (
