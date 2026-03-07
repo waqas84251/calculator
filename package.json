@@ -2,7 +2,7 @@
   "name": "calculator-react-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://waqas84251.github.io/calculator/",
+  "homepage": "https://scientificcalculator.site/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
